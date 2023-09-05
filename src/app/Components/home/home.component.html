@@ -1,0 +1,94 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-6 pl-4">
+      Welcome <b>{{ signalrService.userData!.name }}</b>
+    </div>
+    <div class="col-6 text-right" style="cursor: pointer;" (click)="logOut()">
+      Logout
+    </div>
+    <div class="col-6 text-right" style="cursor: pointer;">
+      <button class="btn btn-primary" (click)="popup = true">Create Group</button>
+    </div>
+    <!-- (click)="CreateGroup('group1')" -->
+  </div>
+
+
+  <div class="row">
+    <!-- List of Users -->
+    <div class="col-12 col-sm-3 offset-sm-3 mt-4">
+      <!-- Online Users -->
+      <label>Online Users</label>
+      <ul class="list-group" *ngFor="let user of users">
+        <li class="list-group-item" style="cursor: pointer;"(click)="selectedUser = user;ToggleChatBox(1)">{{ user.name }}</li>
+      </ul>
+    </div>
+
+    <div class="row">
+      <!-- List of Groups -->
+      <div class="col-12 col-sm-3 offset-sm-3 mt-4">
+        <!-- Online Groups -->
+        <label>Groups</label>
+        <ul class="list-group" *ngFor="let group of groups">
+          <li class="list-group-item" style="cursor: pointer;" (click)="selectedGroup = group;ToggleChatBox(2)">{{ group.groupName }}
+          </li>
+        </ul>
+      </div>
+      <!-- Chat Box -->
+      <div class="col-12 col-sm-3 mt-4" *ngIf="isShownUser">
+        <label><b>{{ selectedUser.name }}</b></label>
+        <div id="chatBox">
+          <div #msgBox id="msgBox" [scrollTop]="msgBox.scrollHeight">
+            <div *ngFor="let msg of selectedUser?.msgs" class="msg"
+  
+              [ngStyle]= "{'background-color':(msg.mine)?'#9afcb3':'#86b7fe'}"   [ngClass]="msg?.mine ? 'msg-right' : 'msg-left'" >
+             {{ msg.content }}
+            </div>
+           <!--  [ngStyle]="{'background-color':(msg.mine)?'#9afcb3':'#86b7fe'}"> -->
+          </div>
+          <textarea [(ngModel)]="msg" id="textarea"></textarea>
+          <button id="sendBtn" class="btn btn-primary" (click)="sendMsgInv()">Send</button>
+        </div>
+      </div>
+      <!-- Group Chat -->
+      <div class="col-12 col-sm-3 mt-4" *ngIf="isShownGroup">  <!--  *ngIf="isShownGroup" -->
+        <label><b>{{ selectedGroup.groupName }}</b></label>
+        <div id="chatBoxGrp">
+          <div #msgBoxGroup id="msgBoxGroup" [scrollTop]="msgBoxGroup.scrollHeight">  <!-- #msgBoxGroup id="msgBoxGroup" [scrollTop]="msgBoxGroup.scrollHeight" -->
+            <div *ngFor="let msg of selectedGroup?.msgs" class="msgGrp"
+              [ngStyle]= "{'background-color':(msg.mine)?'#9afcb3':'#86b7fe'}"   [ngClass]="msg?.mine ? 'msg-right' : 'msg-left'" >
+              <label *ngIf="!msg.mine">{{msg.userName}} : </label>{{ msg.content }}
+            </div>
+          </div>
+          <textarea [(ngModel)]="msGrp" id="textareaGrp"></textarea>
+          <button id="sendGrpBtn" class="btn btn-primary" (click)="sendMsgGrpInv()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [disabled]="selectedUser == null" -->
+  <!-- [class.mine]="msg.mine" -->
+  <div class="overlay" *ngIf="popup">
+    <div class="popup">
+      <h2>Select Online Users for Group </h2>
+      <a class="close" (click)="popup = false">&times;</a>
+      <div class="content">
+        <ul class="list-group" *ngFor="let user of users">
+            <li class="list-group-item" style="cursor: pointer;" (click)="selectedUser = user">{{ user.name }}</li>
+          </ul>
+        <div class="container text-center" id="multiselect">
+          <ng-multiselect-dropdown [placeholder]="'custom placeholder'" [settings]="dropdownSettings" [data]="users"
+            [(ngModel)]="selectedUsersForGroup">
+          </ng-multiselect-dropdown>
+        </div>
+          <div class="row">
+          <div class="col-md-5">
+            <h6>Group Name</h6>
+            <input #GrpName class="form-control">
+          </div>
+          <div class="col-6 text-right" style="cursor: pointer;">
+            <button class="btn btn-primary" (click)="CreateGroup(GrpName.value)">Create Group</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

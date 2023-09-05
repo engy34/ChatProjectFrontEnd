@@ -1,0 +1,154 @@
+#chatBox {
+    border: 1px solid black;
+    border-radius: 5px;
+    height: 320px;
+    position: relative;
+  
+    #msgBox {
+      padding: 5px 10px 5px 10px;
+      height: 200px;
+      overflow-y: auto;
+  
+      .msg {
+        border: 1px solid lightgray;
+        border-radius: 10px;
+        padding: 5px 10px 5px 10px;
+        background-color: #9afcb3;
+        margin: 5px 0 5px 0;
+        word-break: break-word;
+  
+        &.mine { background-color: rgb(186, 222, 235); }
+      }
+    }
+  
+  
+    
+    #textarea {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
+      max-height: 80px;
+      min-height: 80px;
+    }
+  
+  
+    #sendBtn {
+      position: absolute;
+      bottom: 0;
+      height: 40px;
+      width: 100%;
+    }
+  }
+  #chatBoxGrp {
+    border: 1px solid black;
+    border-radius: 5px;
+    height: 320px;
+    position: relative;
+  
+    #msgBoxGroup {
+      padding: 5px 10px 5px 10px;
+      height: 200px;
+      overflow-y: auto;
+  
+      .msgGrp {
+        border: 1px solid lightgray;
+        border-radius: 10px;
+        padding: 5px 10px 5px 10px;
+        background-color: #9afcb3;
+        margin: 5px 0 5px 0;
+        word-break: break-word;
+  
+        &.mine { background-color: rgb(186, 222, 235); } 
+      }
+      .msg-right{
+        text-align: right;
+      }
+      .msg-left{
+        text-align: left;
+      }
+    }
+    #textareaGrp {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
+      max-height: 80px;
+      min-height: 80px;
+    }
+  
+  
+    #sendGrpBtn {
+      position: absolute;
+      bottom: 0;
+      height: 40px;
+      width: 100%;
+    }
+  }
+  
+  .overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+  visibility: visible;
+    opacity: 1;
+  }
+  
+  
+  .popup {
+    margin: 70px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 50%;
+    position: relative;
+    transition: all 5s ease-in-out;
+  }
+  .popup input{
+    margin: 15px;
+    padding: 5px;
+  }
+  .popup h6{
+    margin: 20px;
+  }
+  .popup button{
+    margin: 60px;
+  }
+  .popup h2 {
+    margin-top: 0;
+    color: #333;
+    font-family: Tahoma, Arial, sans-serif;
+  }
+  .popup .close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    transition: all 200ms;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+  }
+  .popup .close:hover {
+    color: #06D85F;
+    cursor: pointer;
+  }
+  .popup .content {
+    max-height: 50%;
+    overflow: auto;
+  }
+   .popup #multiselect{
+    width: 50%;
+  }
+  @media screen and (max-width: 700px){
+  
+    .popup{
+      width: 70%;
+    }
+  }
+  
+  
+  
+  
