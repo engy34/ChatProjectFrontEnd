@@ -37,23 +37,24 @@ export class HomeComponent implements OnInit {
       itemsShowLimit: 3,
       allowSearchFilter: true
     };
-    /*    this.toggleChatBox();
-       this.toggleGrpChatBox(); */
+
     this.userOnLis();
     this.userOfList();
     this.logOutLis();
     this.sendMsgLis();
     this.sendMsgGrpLis();
-    this.getAvailableGroupsLis();  
+    this.getAvailableGroupsLis();
     this.getOnlineUsersLis();
-    this.CreateGroupLis(); 
+    this.GetUserMsgsLis();
+    this.GetUserGrpMsgsLis();
+    this.CreateGroupLis();
     if (this.signalrService.hubConnection.state == HubConnectionState.Connected) { //if already connected
       this.getOnlineUsersInv();
       this.getAvailableGroupsInv();
     }
   }
   logOut() {
-   
+
     this.signalrService.hubConnection.invoke("logOut", this.signalrService.userData.id)
       .catch(err => console.error(err))
   }
@@ -65,60 +66,62 @@ export class HomeComponent implements OnInit {
     });
   }
   ToggleChatBox(toggleType: any) {
-    if(toggleType==1){
-    this.isShownUser =true;/*  !this.isShownUser; *//*  true; */
-    this.isShownGroup =false;/*  !this.isShownGroup */  /* false; */
+    if (toggleType == 1) {
+      this.isShownUser = true;
+      this.isShownGroup = false;
     }
-    else{
-      this.isShownUser =false;/*  !this.isShownUser; *//*  true; */
-      this.isShownGroup =true;
+    else {
+      this.isShownUser = false;
+      this.isShownGroup = true;
     }
   }
-  toggleGrpChatBox() {
-    this.isShownUser = !this.isShownUser;/*  false;
- */    this.isShownGroup = !this.isShownGroup;/* false */
-  }
-  userOnLis(): void {
+/*   private toggleGrpChatBox() {
+    this.isShownUser = !this.isShownUser;
+    this.isShownGroup = !this.isShownGroup;
+  } */
+  private userOnLis(): void {
     this.signalrService.hubConnection.on("userOn", (newUser: User) => {
-   
+
       this.users.push(newUser);
     })
 
   }
-  userOfList(): void {
+  private userOfList(): void {
     this.signalrService.hubConnection.on("useroff", (personId: string) => {
       this.users = this.users.filter(u => u.id != personId);
     })
   }
-  getOnlineUsersInv(): void {
+  private getOnlineUsersInv(): void {
     this.signalrService.hubConnection.invoke("getOnlineUsers")
       .catch(err => console.log(err));
 
   }
-  getOnlineUsersLis(): void {
+  private getOnlineUsersLis(): void {
     this.signalrService.hubConnection.on("getOnlineUsersResponse", (OnlineUsers: Array<User>) => {
+      console.log(OnlineUsers);
       this.users = [...OnlineUsers];
     });
-  } 
-  getAvailableGroupsInv(): void {   
+  }
+  private getAvailableGroupsInv(): void {
 
     this.signalrService.hubConnection.invoke("getAvailableGroups", this.signalrService.userData.id)
       .catch(err => console.log(err));
 
   }
-  getAvailableGroupsLis(): void {
+  private getAvailableGroupsLis(): void {
     this.signalrService.hubConnection.on("getAvailableGroupsResponse", (availableGroups: Array<Group>) => {
 
       this.groups = [...availableGroups];
-  
+
     });
   }
-  sendMsgInv(): void {
+  public sendMsgInv(): void {
+    console.log( this.selectedUser);
     if (this.msg?.trim() === "" || this.msg == null) return;
-    this.signalrService.hubConnection.invoke("sendMsg", this.selectedUser?.connId, this.msg)
+    this.signalrService.hubConnection.invoke("sendMsg", this.signalrService.userData.id, this.selectedUser?.connId, this.msg)
       .catch(err => console.error(err));
     if (this.selectedUser?.msgs == null) this.selectedUser.msgs = [];
-    this.selectedUser?.msgs.push(new message(this.msg, true, this.selectedUser.name, ""));
+    this.selectedUser?.msgs.push(new message(this.msg, true, this.selectedUser.name, "", "",""));
     this.msg = ""
   }
   private sendMsgLis(): void {
@@ -126,34 +129,34 @@ export class HomeComponent implements OnInit {
       let receiver = this.users.find(u => u.connId === connId);
       if (receiver?.msgs == null) receiver!.msgs = [];
 
-      receiver?.msgs.push(new message(msg, false, "", ""));
-    
+      receiver?.msgs.push(new message(msg, false, "", "", "",""));
+
     })
   }
-  sendMsgGrpInv(): void {
+  public sendMsgGrpInv(): void {
     if (this.msGrp?.trim() === "" || this.msGrp == null) return;
-    this.signalrService.hubConnection.invoke("SendGrpMsg",this.signalrService.userData.id, this.selectedGroup?.groupId, this.msGrp)
+    this.signalrService.hubConnection.invoke("SendGrpMsg", this.signalrService.userData.id, this.selectedGroup?.groupId, this.msGrp)
       .catch(err => console.error(err));
 
-     if (this.selectedGroup?.msgs == null) this.selectedGroup.msgs=[];
-           
-    
-    this.selectedGroup?.msgs.push(new message(this.msGrp, true, this.signalrService.userData.name, ""));
- 
+    if (this.selectedGroup?.msgs == null) this.selectedGroup.msgs = [];
+
+
+    this.selectedGroup?.msgs.push(new message(this.msGrp, true, this.signalrService.userData.name, "", "",""));
+
     console.log(this.selectedGroup.msgs)
-    this.msGrp = "" 
+    this.msGrp = ""
   }
   private sendMsgGrpLis(): void {
     console.log("beforeSig")
-    this.signalrService.hubConnection.on("SendGrpMsgResponse", (senderName :string , groupId: string, msg: string) => {
-    
-      console.log('Received message: ',msg );
+    this.signalrService.hubConnection.on("SendGrpMsgResponse", (senderName: string, groupId: string, msg: string) => {
+
+      console.log('Received message: ', msg);
       let receiverGrp = this.groups.find(u => u.groupId === groupId);
       if (receiverGrp?.msgs == null) receiverGrp!.msgs = [];
 
-      receiverGrp?.msgs.push(new message(msg, false,senderName, ""));
-      console.log(receiverGrp?.msgs)  
-    
+      receiverGrp?.msgs.push(new message(msg, false, senderName, "", "",""));
+      console.log(receiverGrp?.msgs)
+
     })
   }
   public CreateGroup = (groupName: string) => {
@@ -178,11 +181,43 @@ export class HomeComponent implements OnInit {
     console.log(this.usersList)
     this.signalrService.hubConnection.invoke('CreateGroup', this.usersList)
       .catch(err => console.error('Error while creating group: ', err));
-   /*    this.getAvailableGroupsInv();  */
   }
-  private CreateGroupLis():void{
-              this.signalrService.hubConnection.on("GroupCreatedResponse",(CreatedGroup:Group)=>{
-                     this.groups.push(CreatedGroup);
-              });
+  private CreateGroupLis(): void {
+    this.signalrService.hubConnection.on("GroupCreatedResponse", (CreatedGroup: Group) => {
+      this.groups.push(CreatedGroup);
+    });
+  }
+  public GetUserMsgs(id: string): void {
+    this.signalrService.hubConnection.invoke("GetUserMsgs", this.signalrService.userData.id, id)
+      .catch(err => console.error(err));
+
+  }
+  private GetUserMsgsLis(): void {
+    this.signalrService.hubConnection.on("GetUserMsgsResponse", (SelecUserMsgs: Array<message>) => {
+      SelecUserMsgs.forEach((msg) => {
+        if (this.selectedUser?.msgs == null) this.selectedUser.msgs = [];
+        if (msg.receiverId == this.signalrService.userData.id) { this.selectedUser?.msgs.push(new message(msg.msg, false, "", "", msg.receiverId,"")); }
+        else { this.selectedUser?.msgs.push(new message(msg.msg, true, "", "", msg.msg,"")); }
+      });
+      console.log(this.selectedUser?.msgs);
+    });
+  }
+
+  public GetUserGrpMsgs(Grpid: string): void {
+    this.signalrService.hubConnection.invoke("GetUserGrpMsgs",Grpid)
+      .catch(err => console.error(err));
+
+  }
+  private GetUserGrpMsgsLis(): void {
+    this.signalrService.hubConnection.on("GetUserMsgsResponse", (SelecUserGrpMsgs: Array<message>) => {
+      console.log(SelecUserGrpMsgs);
+      SelecUserGrpMsgs.forEach((msgGrp) => {
+        let userName=this.users.find(u=>u.id==msgGrp.userId)?.name??"";
+        if (this.selectedGroup?.msgs == null) this.selectedGroup.msgs = [];
+        if (msgGrp.userId == this.signalrService.userData.id) { this.selectedGroup?.msgs.push(new message(msgGrp.msg, true, userName, "", msgGrp.receiverId,"")); }
+        else { this.selectedGroup?.msgs.push(new message(msgGrp.msg, false, userName, "", msgGrp.receiverId,"")); }
+      });
+     
+    });
   }
 }

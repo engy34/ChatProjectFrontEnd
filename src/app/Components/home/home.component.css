@@ -19,6 +19,12 @@
   
         &.mine { background-color: rgb(186, 222, 235); }
       }
+      .msg-right{
+        text-align: right;
+      }
+      .msg-left{
+        text-align: left;
+      }
     }
   
   

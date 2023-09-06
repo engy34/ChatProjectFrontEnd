@@ -6,11 +6,7 @@ export class User {
 }
 export class message {
 
-   constructor(public content: string, public mine: boolean = false, public userName: string, public groupId: string) {
-
-
-   }
- 
+    constructor(public msg: string,public  mine: boolean ,public userName: string,public groupId: string,public receiverId:string,public userId:string){};
 }
 export class Group {
    public groupId: string = "";
@@ -24,5 +20,4 @@ export class GroupUsers {
    public ConnId: string = "";
    public GroupName: string = "";
 
-   /*    public GroupId:string="" */
 };

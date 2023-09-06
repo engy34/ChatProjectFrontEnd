@@ -17,11 +17,7 @@ export class AuthService {
 
     if (tempPersonId) {
 
-      /*  if (this.signalrService.hubConnection.state ==HubConnectionState.Connected) { //if already connected
-         this.reauthMeListener();
-         this.reauthMe(tempPersonId);
-       } */
-
+   
       this.signalrService.ssObs().subscribe((obj: any) => {
         if (obj.type == "HubConnStarted") {
           
@@ -52,8 +48,6 @@ export class AuthService {
     this.signalrService.hubConnection.on("authMeResponseSuccess", (user:User) => {
       console.log(user);
       this.signalrService.userData={...user}
-      console.log(user.id);
-      console.log(this.signalrService.userData)
       localStorage.setItem("personId", user.id);
       this.isAuthenticated = true;
       this.signalrService.toastr.success("Login successful!");
