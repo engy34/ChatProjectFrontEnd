@@ -5,6 +5,7 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { Group, GroupUsers, User, message } from 'src/app/Models/user';
 import { SignalrService } from 'src/app/Services/signalr.service';
 
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -27,6 +28,8 @@ export class HomeComponent implements OnInit {
   isShownGroup: Boolean = false;
   isShownUser: Boolean = true;
   popup: boolean = false;
+  private mediaRecorder: MediaRecorder;
+ recordedChunks: Blob[] = [];
   ngOnInit(): void {
     this.dropdownSettings = {
       singleSelection: false,
@@ -48,6 +51,7 @@ export class HomeComponent implements OnInit {
     this.GetUserMsgsLis();
     this.GetUserGrpMsgsLis();
     this.CreateGroupLis();
+    this.registerVoiceDataReceivedHandler();
     if (this.signalrService.hubConnection.state == HubConnectionState.Connected) { //if already connected
       this.getOnlineUsersInv();
       this.getAvailableGroupsInv();
@@ -75,10 +79,7 @@ export class HomeComponent implements OnInit {
       this.isShownGroup = true;
     }
   }
-/*   private toggleGrpChatBox() {
-    this.isShownUser = !this.isShownUser;
-    this.isShownGroup = !this.isShownGroup;
-  } */
+
   private userOnLis(): void {
     this.signalrService.hubConnection.on("userOn", (newUser: User) => {
 
@@ -133,6 +134,19 @@ export class HomeComponent implements OnInit {
 
     })
   }
+  private sendVoiceData(voiceData: Uint8Array): void {
+    const byteArr = Array.from(voiceData);
+    this.signalrService.hubConnection.invoke('SendVoiceData', byteArr,this.selectedUser?.connId)
+    .catch(err => console.error(err));
+  }
+
+  private registerVoiceDataReceivedHandler(): void {
+  
+
+    this.signalrService.hubConnection.on("BroadcastVoiceData", (voiceData: Uint8Array) => {
+      console.log(voiceData);
+       });
+  }
   public sendMsgGrpInv(): void {
     if (this.msGrp?.trim() === "" || this.msGrp == null) return;
     this.signalrService.hubConnection.invoke("SendGrpMsg", this.signalrService.userData.id, this.selectedGroup?.groupId, this.msGrp)
@@ -147,7 +161,7 @@ export class HomeComponent implements OnInit {
     this.msGrp = ""
   }
   private sendMsgGrpLis(): void {
-    console.log("beforeSig")
+  
     this.signalrService.hubConnection.on("SendGrpMsgResponse", (senderName: string, groupId: string, msg: string) => {
 
       console.log('Received message: ', msg);
@@ -199,7 +213,7 @@ export class HomeComponent implements OnInit {
         if (msg.receiverId == this.signalrService.userData.id) { this.selectedUser?.msgs.push(new message(msg.msg, false, "", "", msg.receiverId,"")); }
         else { this.selectedUser?.msgs.push(new message(msg.msg, true, "", "", msg.msg,"")); }
       });
-      console.log(this.selectedUser?.msgs);
+
     });
   }
 
@@ -218,6 +232,36 @@ export class HomeComponent implements OnInit {
         else { this.selectedGroup?.msgs.push(new message(msgGrp.msg, false, userName, "", msgGrp.receiverId,"")); }
       });
      
+    });
+  }
+
+
+  startRecording(): void {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        this.mediaRecorder = new MediaRecorder(stream);
+        this.mediaRecorder.addEventListener('dataavailable', event => {
+         
+          this.recordedChunks.push(event.data);
+        });
+        
+        this.mediaRecorder.start();
+      })
+      .catch(err => console.error('Error while starting media recording:', err));
+  } 
+
+  stopRecording(): void {  
+    this.mediaRecorder.stop();
+    this.mediaRecorder.addEventListener('stop', () => {
+      const recordedBlob = new Blob(this.recordedChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      console.log(this.recordedChunks)
+      reader.onloadend = () => {
+        const voiceData = new Uint8Array(reader.result as ArrayBuffer);
+        this.sendVoiceData(voiceData);
+      };
+      reader.readAsArrayBuffer(recordedBlob);
+      this.recordedChunks = [];
     });
   }
 }

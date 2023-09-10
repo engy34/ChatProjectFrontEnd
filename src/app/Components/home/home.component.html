@@ -46,8 +46,12 @@
      
           </div>
           <textarea [(ngModel)]="msg" id="textarea"></textarea>
-          <button id="sendBtn" class="btn btn-primary" (click)="sendMsgInv()">Send</button>
-        </div>
+         <!--  <div class="row"> -->
+          <button id="sendBtn" class="btn btn-primary col-md-5"(click)="sendMsgInv()">Send</button>
+          <button id="startRecording"class="btn btn-primary col-md-2" (click)="startRecording()">Start </button>
+          <button id="stopRecording"class="btn btn-primary col-md-2" (click)="stopRecording()">Stop </button>
+      <!--   </div> -->
+      </div>
       </div>
       <!-- Group Chat -->
       <div class="col-12 col-sm-3 mt-4" *ngIf="isShownGroup">  <!--  *ngIf="isShownGroup" -->
@@ -61,6 +65,8 @@
           </div>
           <textarea [(ngModel)]="msGrp" id="textareaGrp"></textarea>
           <button id="sendGrpBtn" class="btn btn-primary" (click)="sendMsgGrpInv()">Send</button>
+          <button (click)="startRecording()">Start Recording</button>
+          <button (click)="stopRecording()">Stop Recording</button>
         </div>
       </div>
     </div>
